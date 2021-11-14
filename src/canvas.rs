@@ -11,7 +11,7 @@ impl Canvas {
         Canvas {
             width,
             height,
-            pixels: vec![vec![Tuple::color(0., 0., 0.); height]; width],
+            pixels: vec![vec![Tuple::color(0., 0., 0.); width]; height],
         }
     }
 
@@ -26,9 +26,9 @@ impl Canvas {
     pub fn get_pixel_at(&self, x: usize, y: usize) -> Result<&Tuple, String> {
         let color = self
             .pixels
-            .get(x)
-            .ok_or(format!("x {} does not exist", x))?
             .get(y)
+            .ok_or(format!("x {} does not exist", x))?
+            .get(x)
             .ok_or(format!("y {} does not exist", y))?;
         Ok(color)
     }
@@ -40,8 +40,22 @@ impl Canvas {
         if y >= self.height {
             return Err(format!("y {} out of range", y));
         }
-        self.pixels[x][y] = color;
+        self.pixels[y][x] = color;
         Ok(())
+    }
+
+    pub fn to_ppm_string(&self) -> String {
+        let mut ppm = format!("P3\n{} {}\n255\n", self.width, self.height);
+        for col in &self.pixels {
+            for pixel in col {
+                let red = (pixel.0 * 255.).clamp(0., 255.).round();
+                let green = (pixel.1 * 255.).clamp(0., 255.).round();
+                let blue = (pixel.2 * 255.).clamp(0., 255.).round();
+                ppm.push_str(&format!("{} {} {} ", red, green, blue));
+            }
+            ppm.push('\n');
+        }
+        ppm
     }
 }
 
@@ -73,5 +87,18 @@ mod tests {
         c.write_pixel_at(2, 3, red)
             .expect("Writing to canvas should work");
         assert_eq!(c.get_pixel_at(2, 3).unwrap(), &Tuple::color(1.0, 0., 0.));
+    }
+
+    #[test]
+    fn canvas_to_ppm() {
+        let mut c = Canvas::new(5, 3);
+        c.write_pixel_at(0, 0, Tuple::color(1.5, 0., 0.)).unwrap();
+        c.write_pixel_at(2, 1, Tuple::color(0., 0.5, 0.)).unwrap();
+        c.write_pixel_at(4, 2, Tuple::color(-0.5, 0., 1.)).unwrap();
+
+        assert_eq!(
+            c.to_ppm_string(),
+            "P3\n5 3\n255\n255 0 0 0 0 0 0 0 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 128 0 0 0 0 0 0 0 \n0 0 0 0 0 0 0 0 0 0 0 0 0 0 255 \n"
+        );
     }
 }
