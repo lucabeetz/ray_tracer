@@ -1,6 +1,6 @@
 use std::ops;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Tuple(pub f32, pub f32, pub f32, pub f32);
 
 impl Tuple {
@@ -105,7 +105,7 @@ impl ops::Neg for Tuple {
     }
 }
 
-mod tuple_tests {
+mod tests {
     use float_cmp::approx_eq;
 
     use super::*;
