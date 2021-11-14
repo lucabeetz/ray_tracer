@@ -135,4 +135,17 @@ mod tuple_tests {
         assert_eq!(v1.cross(&v2), Tuple::vector(-1., 2., -1.));
         assert_eq!(v2.cross(&v1), Tuple::vector(1., -2., 1.));
     }
+
+    #[test]
+    fn colors_are_tuples() {
+        let c = Tuple::color(-0.5, 0.5, 1.7);
+        assert_eq!(c, Tuple(-0.5, 0.5, 1.7, 1.0));
+    }
+
+    #[test]
+    fn hadamard_product() {
+        let c1 = Tuple::color(1.0, 0.2, 0.5);
+        let c2 = Tuple::color(0.9, 1., 0.1);
+        assert_eq!(c1.hadamard(&c2), Tuple::color(0.9, 0.2, 0.05));
+    }
 }

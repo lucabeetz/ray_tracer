@@ -12,6 +12,10 @@ impl Tuple {
         Self(x, y, z, 0.0)
     }
 
+    pub fn color(r: f32, g: f32, b: f32) -> Self {
+        Self(r, g, b, 1.0)
+    }
+
     pub fn is_point(&self) -> bool {
         self.3 == 1.0
     }
@@ -38,6 +42,15 @@ impl Tuple {
             self.1 * other.2 - self.2 * other.1,
             self.2 * other.0 - self.0 * other.2,
             self.0 * other.1 - self.1 * other.0,
+        )
+    }
+
+    pub fn hadamard(&self, other: &Tuple) -> Self {
+        Self(
+            self.0 * other.0,
+            self.1 * other.1,
+            self.2 * other.2,
+            self.3 * other.3,
         )
     }
 }
