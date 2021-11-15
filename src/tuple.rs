@@ -105,6 +105,7 @@ impl ops::Neg for Tuple {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use float_cmp::approx_eq;
 
