@@ -1,3 +1,6 @@
+use std::fs::File;
+use std::io::prelude::*;
+
 use crate::tuple::Tuple;
 
 pub struct Canvas {
@@ -56,6 +59,12 @@ impl Canvas {
             ppm.push('\n');
         }
         ppm
+    }
+
+    pub fn write_to_file(&self, file_path: &str) -> std::io::Result<()> {
+        let mut file = File::create(file_path)?;
+        file.write_all(self.to_ppm_string().as_bytes())?;
+        Ok(())
     }
 }
 
