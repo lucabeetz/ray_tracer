@@ -28,6 +28,14 @@ impl Matrix {
         }
     }
 
+    pub fn identity(size: usize) -> Self {
+        let mut values = vec![vec![0.; size]; size];
+        for i in 0..size {
+            values[i][i] = 1.;
+        }
+        Matrix::from_values(values)
+    }
+
     pub fn get(&self, row: usize, col: usize) -> f32 {
         self.values[row][col]
     }
@@ -200,5 +208,22 @@ mod tests {
         let vec = Tuple(1., 2., 3., 1.0);
         let res = Tuple(18., 24., 33., 1.);
         assert!(m.dot(&vec.into()).equals(&res.into()));
+    }
+
+    #[test]
+    fn multply_with_identity() {
+        let values = vec![
+            vec![1., 2., 3., 4.],
+            vec![2., 4., 4., 2.],
+            vec![8., 6., 4., 1.],
+            vec![0., 0., 0., 1.],
+        ];
+        let m = Matrix::from_values(values);
+        let eye = Matrix::identity(4);
+        assert!(m.equals(&m.dot(&eye)));
+
+        let vec = Tuple(1., 2., 3., 1.0);
+        let res_vec = eye.dot(&vec.clone().into());
+        assert!(vec.equals(&res_vec.into()));
     }
 }
