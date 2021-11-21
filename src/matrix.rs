@@ -76,11 +76,12 @@ impl Matrix {
         Self::from_values(res_values)
     }
 
-    pub fn transpose(&mut self) {
+    pub fn transpose(mut self) -> Self {
         self.transposed = !self.transposed;
         let cols = self.cols;
         self.cols = self.rows;
         self.rows = cols;
+        self
     }
 }
 
@@ -255,15 +256,13 @@ mod tests {
             vec![3., 0., 5., 5.],
             vec![0., 8., 3., 8.],
         ];
-        let mut m = Matrix::from_values(values);
-        m.transpose();
-        assert!(m.equals(&Matrix::from_values(t_values)));
+        let m = Matrix::from_values(values);
+        assert!(m.transpose().equals(&Matrix::from_values(t_values)));
     }
 
     #[test]
     fn transpose_identity_matrix() {
-        let mut eye = Matrix::identity(4);
-        eye.transpose();
-        assert!(eye.equals(&Matrix::identity(4)));
+        let eye = Matrix::identity(4);
+        assert!(eye.transpose().equals(&Matrix::identity(4)));
     }
 }
