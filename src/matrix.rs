@@ -2,6 +2,9 @@ use std::ops;
 
 use float_cmp::{ApproxEq, F32Margin};
 
+use crate::tuple::Tuple;
+
+#[derive(Debug)]
 pub struct Matrix {
     rows: usize,
     cols: usize,
@@ -25,8 +28,8 @@ impl Matrix {
         }
     }
 
-    pub fn get(&self, x: usize, y: usize) -> f32 {
-        self.values[x][y]
+    pub fn get(&self, row: usize, col: usize) -> f32 {
+        self.values[row][col]
     }
 
     pub fn shape(&self) -> (usize, usize) {
@@ -64,15 +67,22 @@ impl<'a> ApproxEq for &'a Matrix {
 
     fn approx_eq<T: Into<Self::Margin>>(self, other: Self, margin: T) -> bool {
         let margin = margin.into();
-        for x in 0..self.cols {
-            for y in 0..self.rows {
-                if !self.get(x, y).approx_eq(other.get(x, y), margin) {
+        for col in 0..self.cols {
+            for row in 0..self.rows {
+                if !self.get(row, col).approx_eq(other.get(row, col), margin) {
                     return false;
                 }
             }
         }
 
         return true;
+    }
+}
+
+impl From<Tuple> for Matrix {
+    fn from(tuple: Tuple) -> Self {
+        let values = vec![vec![tuple.0], vec![tuple.1], vec![tuple.2], vec![tuple.3]];
+        Matrix::from_values(values)
     }
 }
 
@@ -164,5 +174,31 @@ mod tests {
         let m2 = Matrix::from_values(values2);
         let res = Matrix::from_values(values_res);
         assert!(m1.dot(&m2).equals(&res));
+    }
+
+    #[test]
+    fn matrix_from_tuple() {
+        let vec = Tuple(1., 2., 3., 1.);
+        let m_vec: Matrix = vec.into();
+        assert_eq!(m_vec.rows, 4);
+        assert_eq!(m_vec.cols, 1);
+
+        let res_values = vec![vec![1.], vec![2.], vec![3.], vec![1.]];
+        let m_res = Matrix::from_values(res_values);
+        assert!(m_vec.equals(&m_res));
+    }
+
+    #[test]
+    fn multiply_matrix_with_tuple() {
+        let values1 = vec![
+            vec![1., 2., 3., 4.],
+            vec![2., 4., 4., 2.],
+            vec![8., 6., 4., 1.],
+            vec![0., 0., 0., 1.],
+        ];
+        let m = Matrix::from_values(values1);
+        let vec = Tuple(1., 2., 3., 1.0);
+        let res = Tuple(18., 24., 33., 1.);
+        assert!(m.dot(&vec.into()).equals(&res.into()));
     }
 }

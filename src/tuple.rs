@@ -1,5 +1,9 @@
 use std::ops;
 
+use float_cmp::{ApproxEq, F32Margin};
+
+use crate::matrix::Matrix;
+
 #[derive(PartialEq, Debug, Clone)]
 pub struct Tuple(pub f32, pub f32, pub f32, pub f32);
 
@@ -53,6 +57,16 @@ impl Tuple {
             self.3 * other.3,
         )
     }
+
+    pub fn equals(&self, other: &Tuple) -> bool {
+        self.approx_eq(
+            other,
+            F32Margin {
+                epsilon: 0.0,
+                ulps: 2,
+            },
+        )
+    }
 }
 
 impl ops::Add<Tuple> for Tuple {
@@ -102,6 +116,29 @@ impl ops::Neg for Tuple {
 
     fn neg(self) -> Self {
         Self(-self.0, -self.1, -self.2, -self.3)
+    }
+}
+
+impl From<Matrix> for Tuple {
+    fn from(matrix: Matrix) -> Self {
+        Tuple(
+            matrix.get(0, 0),
+            matrix.get(1, 0),
+            matrix.get(2, 0),
+            matrix.get(3, 0),
+        )
+    }
+}
+
+impl<'a> ApproxEq for &'a Tuple {
+    type Margin = F32Margin;
+
+    fn approx_eq<T: Into<Self::Margin>>(self, other: Self, margin: T) -> bool {
+        let margin = margin.into();
+        self.0.approx_eq(other.0, margin)
+            && self.1.approx_eq(other.1, margin)
+            && self.2.approx_eq(other.2, margin)
+            && self.3.approx_eq(other.3, margin)
     }
 }
 
@@ -253,5 +290,13 @@ mod tests {
         let c1 = Tuple::color(1.0, 0.2, 0.5);
         let c2 = Tuple::color(0.9, 1., 0.1);
         assert_eq!(c1.hadamard(&c2), Tuple::color(0.9, 0.2, 0.05));
+    }
+
+    #[test]
+    fn tuple_from_matrix() {
+        let tuple = Tuple(1., 2., 3., 1.);
+        let values = vec![vec![1.], vec![2.], vec![3.], vec![1.]];
+        let m = Matrix::from_values(values);
+        assert!(tuple.equals(&m.into()));
     }
 }
