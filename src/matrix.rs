@@ -42,6 +42,21 @@ impl Matrix {
             },
         )
     }
+
+    pub fn dot(&self, other: &Matrix) -> Self {
+        let res_shape = (self.rows, other.cols);
+        let mut res_values = vec![vec![0.; res_shape.1]; res_shape.0];
+        for i in 0..res_shape.0 {
+            for j in 0..res_shape.1 {
+                let mut sum = 0.;
+                for a in 0..self.cols {
+                    sum += self.get(i, a) * other.get(a, j);
+                }
+                res_values[i][j] = sum;
+            }
+        }
+        Self::from_values(res_values)
+    }
 }
 
 impl<'a> ApproxEq for &'a Matrix {
@@ -123,5 +138,31 @@ mod tests {
         ];
         let m3 = Matrix::from_values(values2);
         assert!(!m1.equals(&m3));
+    }
+
+    #[test]
+    fn multiply_two_matrices() {
+        let values1 = vec![
+            vec![1., 2., 3., 4.],
+            vec![5., 6., 7., 8.],
+            vec![9., 8., 7., 6.],
+            vec![5., 4., 3., 2.],
+        ];
+        let values2 = vec![
+            vec![-2., 1., 2., 3.],
+            vec![3., 2., 1., -1.],
+            vec![4., 3., 6., 5.],
+            vec![1., 2., 7., 8.],
+        ];
+        let values_res = vec![
+            vec![20., 22., 50., 48.],
+            vec![44., 54., 114., 108.],
+            vec![40., 58., 110., 102.],
+            vec![16., 26., 46., 42.],
+        ];
+        let m1 = Matrix::from_values(values1);
+        let m2 = Matrix::from_values(values2);
+        let res = Matrix::from_values(values_res);
+        assert!(m1.dot(&m2).equals(&res));
     }
 }
