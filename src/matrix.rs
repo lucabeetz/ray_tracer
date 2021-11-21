@@ -9,6 +9,7 @@ pub struct Matrix {
     rows: usize,
     cols: usize,
     values: Vec<Vec<f32>>,
+    transposed: bool,
 }
 
 impl Matrix {
@@ -17,6 +18,7 @@ impl Matrix {
             rows,
             cols,
             values: vec![vec![0.; cols]; rows],
+            transposed: false,
         }
     }
 
@@ -25,6 +27,7 @@ impl Matrix {
             rows: values.len(),
             cols: values[0].len(),
             values,
+            transposed: false,
         }
     }
 
@@ -37,7 +40,11 @@ impl Matrix {
     }
 
     pub fn get(&self, row: usize, col: usize) -> f32 {
-        self.values[row][col]
+        if !self.transposed {
+            return self.values[row][col];
+        } else {
+            return self.values[col][row];
+        }
     }
 
     pub fn shape(&self) -> (usize, usize) {
@@ -67,6 +74,13 @@ impl Matrix {
             }
         }
         Self::from_values(res_values)
+    }
+
+    pub fn transpose(&mut self) {
+        self.transposed = !self.transposed;
+        let cols = self.cols;
+        self.cols = self.rows;
+        self.rows = cols;
     }
 }
 
@@ -225,5 +239,31 @@ mod tests {
         let vec = Tuple(1., 2., 3., 1.0);
         let res_vec = eye.dot(&vec.clone().into());
         assert!(vec.equals(&res_vec.into()));
+    }
+
+    #[test]
+    fn transpose_matrix() {
+        let values = vec![
+            vec![0., 9., 3., 0.],
+            vec![9., 8., 0., 8.],
+            vec![1., 8., 5., 3.],
+            vec![0., 0., 5., 8.],
+        ];
+        let t_values = vec![
+            vec![0., 9., 1., 0.],
+            vec![9., 8., 8., 0.],
+            vec![3., 0., 5., 5.],
+            vec![0., 8., 3., 8.],
+        ];
+        let mut m = Matrix::from_values(values);
+        m.transpose();
+        assert!(m.equals(&Matrix::from_values(t_values)));
+    }
+
+    #[test]
+    fn transpose_identity_matrix() {
+        let mut eye = Matrix::identity(4);
+        eye.transpose();
+        assert!(eye.equals(&Matrix::identity(4)));
     }
 }
